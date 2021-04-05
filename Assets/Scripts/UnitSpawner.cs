@@ -10,7 +10,6 @@ public class UnitSpawner : MonoBehaviour
         public string name;
         public RuntimeAnimatorController animationController;
         public Sprite sprite;
-        public Vector3 gridOffset;
     }
 
     [System.Serializable]
@@ -25,23 +24,36 @@ public class UnitSpawner : MonoBehaviour
     {
         public int characterIndex;
         public int team;
-        public Vector2Int gridPosition;
+        public Vector3 position;
     }
     
     [SerializeField] GameObject m_unitPrefab;
     [SerializeField] Character[] m_characters;
     [SerializeField] Team[] m_teams;
-    [SerializeField] UnityEngine.Grid m_grid;
-
+    
     void Start()
     {
-        for (int i = 0; i < 12; ++i)
+        Vector2[] positions =
         {
+            new Vector2(-6, 4),
+            new Vector2(6, 4),
+            new Vector2(-3, 2),
+            new Vector2(3, 2),
+            new Vector2(-6, 0),
+            new Vector2(6, 0),
+            new Vector2(-3, -2),
+            new Vector2(3, -2),
+            new Vector2(-6, -4),
+            new Vector2(6, -4)
+        };
+        for (int i = 0; i < 10; ++i)
+        {
+            int team = i % 2;
             UnitToSpawn spawnUnit = new UnitToSpawn
             {
                 characterIndex = Random.Range(0,2),
-                team = i % 2,
-                gridPosition = new Vector2Int(Random.Range(0, 5) + (5 * (i % 2)), Random.Range(0, 7))
+                team = team,
+                position = positions[i]
             };
             spawn(spawnUnit);
         }
@@ -54,7 +66,7 @@ public class UnitSpawner : MonoBehaviour
         spriteRenderer.sprite = m_characters[_unit.characterIndex].sprite;
         spriteRenderer.color = m_teams[_unit.team].colour;
         spriteRenderer.flipX = m_teams[_unit.team].facingDirection == -1;
-        instance.transform.position = m_grid.CellToWorld(new Vector3Int(_unit.gridPosition.x, _unit.gridPosition.y, 0)) + m_characters[_unit.characterIndex].gridOffset;
+        instance.transform.localPosition = _unit.position;
         instance.GetComponent<Animator>().runtimeAnimatorController = m_characters[_unit.characterIndex].animationController;
     }
 }

@@ -7,7 +7,7 @@ public class Unit : MonoBehaviour
     ushort m_actionsSincePickup = 0;
     Ball m_hasBall = null;
     [SerializeField] GameObject m_moveRadius = null;
-    [SerializeField] GameObject m_aimCone = null;
+    [SerializeField] AimCone m_aimCone = null;
     [SerializeField] SpriteRenderer[] m_actionQueueRenderers = null;
     Action[] m_actionQueue = { Action.Null, Action.Null };
     EntitySpawner m_entitySpawner = null;
@@ -72,7 +72,7 @@ public class Unit : MonoBehaviour
 
     public void showAimCone(bool _value)
     {
-        m_aimCone.SetActive(_value);
+        m_aimCone.gameObject.SetActive(_value);
     }
 
     public void setActionQueueRenderer(int _index, Color _colour)

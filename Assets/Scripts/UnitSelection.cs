@@ -21,7 +21,13 @@ public class UnitSelection : MonoBehaviour
                 return;
             possiblyClickedUnits.Sort((Unit a, Unit b) =>
             {
-                 return a.actionQueueLength() - b.actionQueueLength();
+                int aActionQueue = a.actionQueueLength();
+                int bActionQueue = b.actionQueueLength();
+                if (aActionQueue != bActionQueue)
+                {
+                    return a.actionQueueLength() - b.actionQueueLength();
+                }
+                return distanceToUnit(a, clickPos).magnitude > distanceToUnit(b, clickPos).magnitude ? -1 : 1;
             });
             selectUnit(possiblyClickedUnits[0]);
         }

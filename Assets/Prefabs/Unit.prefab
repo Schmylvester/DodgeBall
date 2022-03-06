@@ -845,7 +845,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_moveRadius: {fileID: 6450442729312409456}
-  m_aimCone: {fileID: 5791241156718283890}
+  m_aimCone: {fileID: 5761562883054456243}
   m_actionQueueRenderers:
   - {fileID: 6450442729714101053}
   - {fileID: 6450442729499608827}

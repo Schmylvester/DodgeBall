@@ -30,4 +30,16 @@ public class EntitySpawner : MonoBehaviour
             unit.initialise(this);
         }
     }
+
+    public bool allUnitsActionsSelected()
+    {
+        foreach (Unit unit in m_allUnits)
+        {
+            if (unit.actionQueueLength() < 2)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
 }

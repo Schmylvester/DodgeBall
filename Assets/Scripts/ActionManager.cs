@@ -11,6 +11,8 @@ public class ActionManager : MonoBehaviour
     [SerializeField] Image[] m_actionHighlights = null;
     [SerializeField] Image[] m_actionIconIndicators = null;
     [SerializeField] UnitSelection m_unitSelection = null;
+    [SerializeField] EntitySpawner m_entitySpawner = null;
+    [SerializeField] GameObject m_readyButton = null;
     [HideInInspector] public Unit m_selectedUnit = null;
     Action m_waitingForAClick = Action.Null;
 
@@ -89,6 +91,10 @@ public class ActionManager : MonoBehaviour
                     m_actionIconIndicators[i].sprite = m_icons[(int)action];
                 }
             }
+        }
+        if (m_entitySpawner.allUnitsActionsSelected())
+        {
+            m_readyButton.SetActive(true);
         }
     }
 

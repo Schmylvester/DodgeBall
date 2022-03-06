@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AnimationController : MonoBehaviour
+public class CharacterAnimator : MonoBehaviour
 {
     [SerializeField] bool m_debugOn = false;
     [SerializeField] Animator m_anim = null;

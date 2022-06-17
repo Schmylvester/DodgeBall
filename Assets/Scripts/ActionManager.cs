@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class ActionManager : MonoBehaviour
 {
-
+    [SerializeField] Text m_tipText = null;
     [SerializeField] Button[] m_buttons = null;
     [SerializeField] Sprite[] m_icons = null;
     [SerializeField] Image[] m_actionHighlights = null;
@@ -59,6 +59,7 @@ public class ActionManager : MonoBehaviour
     {
         m_unitSelection.setCanSelectUnit(true);
         m_waitingForAClick = Action.Null;
+        m_tipText.text = "";
     }
 
     Vector2 getPointOnMoveRadius(Vector2 clickPos)
@@ -98,6 +99,49 @@ public class ActionManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// rather than set buttons to interactable, we should
+    /// just change the colour of buttons we don't think are good
+    /// because the state of the game is uncertain we should not
+    /// disable buttons that we think won't be available
+    /// </summary>
+    /// <param name="_button">the button to change</param>
+    /// <param name="_buttonGood">0 - 1, chances that this action will succeed</param>
+    void applyButtonColour(Button _button, float _buttonGood)
+    {
+        ColorBlock colourSet = _button.colors;
+        colourSet.normalColor = Color.Lerp(
+            GameManager.Get.constants.g_awfulActionColour,
+            GameManager.Get.constants.g_fineActionColour,
+            _buttonGood);
+        colourSet.selectedColor = Color.Lerp(
+            GameManager.Get.constants.g_awfulActionColour,
+            GameManager.Get.constants.g_fineActionColour,
+            _buttonGood);
+        _button.interactable = _buttonGood != 0;
+        _button.colors = colourSet;
+    }
+
+    float calculateNearBallPrediction(Unit _unit)
+    {
+        if (_unit.nearBall())
+            return 1;
+        return _unit.getActionInQueue(0) == Action.Null ? 0.05f : 0.2f;
+    }
+
+    float calculateHasBallPrediction(Unit _unit)
+    {
+        if (_unit.hasBall())
+            return 1.0f;
+
+        if (_unit.getActionInQueue(0) == Action.Catch)
+        {
+            return 0.25f;
+        }
+
+        return 0.0f;
+    }
+
     void updateButtonInteractability(Unit _unit)
     {
         if (_unit.actionQueueLength() >= 2)
@@ -109,14 +153,22 @@ public class ActionManager : MonoBehaviour
         }
         else
         {
-            m_buttons[(int)Action.Move].interactable = true;
-            m_buttons[(int)Action.Throw].interactable = _unit.hasBall();
-            m_buttons[(int)Action.Wait].interactable = true;
-            m_buttons[(int)Action.Catch].interactable = !_unit.hasBall();
-            m_buttons[(int)Action.Rush].interactable = _unit.getActionInQueue(0) != Action.Rush;
-            m_buttons[(int)Action.PickUp].interactable = _unit.nearBall() && !_unit.hasBall();
-            m_buttons[(int)Action.Block].interactable = _unit.hasBall();
-            m_buttons[(int)Action.Pass].interactable = _unit.hasBall();
+            // currently no conditions for whether a player can move
+            applyButtonColour(m_buttons[(int)Action.Move], 1);
+            // you can only throw a ball if you have one
+            applyButtonColour(m_buttons[(int)Action.Throw], calculateHasBallPrediction(_unit));
+            // currently no conditions for whether a player can wait
+            applyButtonColour(m_buttons[(int)Action.Wait], 1);
+            // you can only catch a ball if you don't have one
+            applyButtonColour(m_buttons[(int)Action.Catch], 1 - calculateHasBallPrediction(_unit));
+            // rushing for both actions wouldn't do anything
+            applyButtonColour(m_buttons[(int)Action.Rush], _unit.getActionInQueue(0) != Action.Rush ? 1: 0);
+            // you can pick up a ball if you're near one and don't already have one
+            applyButtonColour(m_buttons[(int)Action.PickUp], Mathf.Max(calculateNearBallPrediction(_unit) - calculateHasBallPrediction(_unit), 0));
+            // you can only block with a ball
+            applyButtonColour(m_buttons[(int)Action.Block], calculateHasBallPrediction(_unit));
+            // you can only pass a ball if you have one
+            applyButtonColour(m_buttons[(int)Action.Pass], calculateHasBallPrediction(_unit));
         }
     }
 
@@ -135,15 +187,18 @@ public class ActionManager : MonoBehaviour
             case Action.Move:
                 m_unitSelection.setCanSelectUnit(false);
                 m_selectedUnit.showMoveRadius(true);
+                m_tipText.text = "Move where?";
                 m_waitingForAClick = Action.Move;
                 break;
             case Action.Throw:
                 m_unitSelection.setCanSelectUnit(false);
                 m_selectedUnit.showAimCone(true);
+                m_tipText.text = "Throw where?";
                 m_waitingForAClick = Action.Throw;
                 break;
             case Action.Pass:
                 m_unitSelection.setCanSelectUnit(false);
+                m_tipText.text = "Pass to whom?";
                 m_waitingForAClick = Action.Pass;
                 break;
             case Action.Wait:
